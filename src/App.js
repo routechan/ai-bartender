@@ -2,7 +2,97 @@ import Ingredients from "./components/Ingredients";
 import Alcohol from "./components/Alcohol";
 import Taste from "./components/Taste";
 import Mood from "./components/Mood";
+import axios from "axios";
+import { useState } from "react";
+
 function App() {
+  const [cocktail, setCocktail] = useState(null);
+
+  // 材料
+  const [ingredients, setIngredients] = useState([]);
+  const addIngredient = (ingredient) => {
+    setIngredients([...ingredients, ingredient]);
+  };
+  const removeIngredient = (ingredient) => {
+    setIngredients(ingredients.filter((i) => i !== ingredient));
+  };
+
+  // アルコール
+  const [alcohol, setAlcohol] = useState(0);
+  const handleAlcoholChange = (alcohol) => {
+    setAlcohol(alcohol);
+  };
+
+  // 味わい
+  const [taste, setTaste] = useState(0);
+  const handleTasteChange = (taste) => {
+    setTaste(taste);
+  };
+
+  // 気分
+  const [mood, setMood] = useState("");
+  const handleMoodChange = (mood) => {
+    setMood(mood);
+  };
+
+  // カクテル生成
+  const handleSubmit = async (e) => {
+    if (!ingredients.length) {
+      alert("材料を入力してください");
+      return;
+    } else if (!mood) {
+      alert("気分を入力してください");
+      return;
+    }
+    e.preventDefault();
+
+    const prompt = `
+    以下の情報を元にオリジナルカクテルを生成してください。
+      ・使う材料は入力された材料（全て使わなくてもいい）。
+      ・材料の数は多くても4つまでにしてください。
+      ・レモンはレモンジュースではありません
+      ・材料にはどのくらいの量を使うのかを明示して
+      ・材料に優先順位はないです、後半に入力された材料も使ってください
+      ・ストーリーはカクテルの背景をロマンチックな感じで作って。
+
+      1. ${ingredients.join(",")}
+      2. アルコールの強さ(0に近いほど弱く、100に近いほど強い): ${alcohol}/100
+      3. 味わい(0に近いほど甘く、100に近いほど辛い): ${taste}/100
+      5. 気分: ${mood}
+
+      結果には以下を含めてください：
+      - カクテル名
+      - 材料（カクテルに使用するものだけ）
+      - 作り方
+      - 背景ストーリー
+          `;
+
+    try {
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-4-turbo",
+          messages: [
+            { role: "system", content: "あなたはプロのバーテンダーです。" },
+            { role: "user", content: prompt },
+          ],
+
+          temperature: 1.0,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+          },
+        }
+      );
+
+      setCocktail(response.data.choices[0].message.content);
+    } catch (error) {
+      console.error("Error generating cocktail:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 p-4">
       <h1 className="text-2xl font-bold text-center">AIバーテンダー</h1>
@@ -15,13 +105,26 @@ function App() {
         className="max-w-2xl mx-auto  p-4 bg-white rounded-lg shadow-md mt-6
       "
       >
-        <Ingredients />
-        <Alcohol />
-        <Taste />
-        <Mood />
-        <button className="bg-orange-400 p-2 rounded-md text-white block w-full mt-8 ">
+        <Ingredients
+          addIngredient={addIngredient}
+          ingredients={ingredients}
+          removeIngredient={removeIngredient}
+        />
+        <Alcohol handleAlcoholChange={handleAlcoholChange} />
+        <Taste handleTasteChange={handleTasteChange} />
+        <Mood handleMoodChange={handleMoodChange} />
+        <button
+          onClick={handleSubmit}
+          className="bg-orange-400 p-2 rounded-md text-white block w-full mt-8 "
+        >
           カクテルを生成
         </button>
+        {cocktail && (
+          <div>
+            <h2>生成されたカクテル</h2>
+            {cocktail}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 
-const Alcohol = () => {
+const Alcohol = ({ handleAlcoholChange }) => {
   return (
     <div className="mt-6">
       <label
@@ -16,6 +16,7 @@ const Alcohol = () => {
           <span className="text-sm">強</span>
         </div>
         <input
+          onChange={(e) => handleAlcoholChange(e.target.value)}
           id="alcohol"
           type="range"
           min="0"

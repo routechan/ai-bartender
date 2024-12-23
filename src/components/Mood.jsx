@@ -9,11 +9,12 @@ const moods = [
   "エレガント",
 ];
 
-const Mood = () => {
+const Mood = ({ handleMoodChange }) => {
   const [selectedMood, setSelectedMood] = useState();
 
   const onSelect = (mood) => {
     setSelectedMood(mood);
+    handleMoodChange(mood);
   };
 
   return (

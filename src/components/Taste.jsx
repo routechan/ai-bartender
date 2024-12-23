@@ -1,6 +1,6 @@
 import React from "react";
 
-const Taste = () => {
+const Taste = ({ handleTasteChange }) => {
   return (
     <div className="mt-6">
       <label
@@ -16,6 +16,7 @@ const Taste = () => {
           <span className="text-sm">辛</span>
         </div>
         <input
+          onChange={(e) => handleTasteChange(e.target.value)}
           id="taste"
           type="range"
           min="0"

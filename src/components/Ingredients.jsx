@@ -32,7 +32,7 @@ const Ingredients = ({ addIngredient, ingredients, removeIngredient }) => {
           />
           <button
             type="submit"
-            className="bg-orange-400 p-2 rounded-md text-white"
+            className="bg-orange-400 p-2 rounded-md text-white hover:bg-orange-500 duration-300"
           >
             追加
           </button>
